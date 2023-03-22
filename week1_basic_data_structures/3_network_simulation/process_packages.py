@@ -10,10 +10,22 @@ class Buffer:
     def __init__(self, size):
         self.size = size
         self.finish_time = []
+        self.count = 0
 
     def process(self, request):
-        # write your code here
-        return Response(False, -1)
+        if self.count > 0:
+            while self.count and self.finish_time[0] <= request.arrived_at:
+                self.finish_time.pop(0)
+                self.count -= 1
+        if self.count == 0:
+            self.finish_time.append(request.arrived_at+request.time_to_process)
+            self.count += 1
+            return Response(False, request.arrived_at)
+        if self.count == self.size:
+            return Response(True, -1)
+        self.finish_time.append(self.finish_time[self.count-1] + request.time_to_process)
+        self.count += 1
+        return Response(False, self.finish_time[self.count-2])
 
 
 def process_requests(requests, buffer):
