@@ -13,11 +13,25 @@ def build_heap(data):
     #
     # TODO: replace by a more efficient implementation
     swaps = []
-    for i in range(len(data)):
-        for j in range(i + 1, len(data)):
-            if data[i] > data[j]:
-                swaps.append((i, j))
-                data[i], data[j] = data[j], data[i]
+    n = len(data)
+    last_non_leaf_node = (n//2) - 1
+    for i in range(last_non_leaf_node, -1, -1):
+        swaps.extend(heapify(data, n, i))
+    return swaps
+
+def heapify(arr, n, i):
+    swaps = []
+    left_child = 2 * i + 1
+    right_child = 2 * i + 2
+    smallest = i
+    if left_child < n and arr[left_child] < arr[smallest]:
+        smallest = left_child
+    if right_child < n and arr[right_child] < arr[smallest]:
+        smallest = right_child
+    if smallest != i:
+        swaps = [(i, smallest)]
+        arr[i], arr[smallest] = arr[smallest], arr[i]
+        swaps.extend(heapify(arr, n, smallest))
     return swaps
 
 
