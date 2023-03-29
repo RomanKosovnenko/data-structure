@@ -37,7 +37,7 @@ def smallRotation(v):
   if grandparent != None:
     if grandparent.left == parent:
       grandparent.left = v
-    else: 
+    else:
       grandparent.right = v
 
 def bigRotation(v):
@@ -48,8 +48,8 @@ def bigRotation(v):
   elif v.parent.right == v and v.parent.parent.right == v.parent:
     # Zig-zig
     smallRotation(v.parent)
-    smallRotation(v)    
-  else: 
+    smallRotation(v)
+  else:
     # Zig-zag
     smallRotation(v)
     smallRotation(v)
@@ -57,10 +57,10 @@ def bigRotation(v):
 # Makes splay of the given vertex and makes
 # it the new root.
 def splay(v):
-  if v == None:
+  if v is None:
     return None
   while v.parent != None:
-    if v.parent.parent == None:
+    if v.parent.parent is None:
       smallRotation(v)
       break
     bigRotation(v)
@@ -74,27 +74,29 @@ def splay(v):
 # bigger key (next value in the order).
 # If the key is bigger than all keys in the tree,
 # then result is None.
-def find(root, key): 
+def find(root, key):
   v = root
   last = root
   next = None
   while v != None:
     if v.key >= key and (next == None or v.key < next.key):
-      next = v    
+      next = v
     last = v
     if v.key == key:
-      break    
+      break
     if v.key < key:
       v = v.right
-    else: 
-      v = v.left      
+    else:
+      v = v.left
   root = splay(last)
+  if next is not None:
+    root = splay(next)
   return (next, root)
 
-def split(root, key):  
-  (result, root) = find(root, key)  
-  if result == None:    
-    return (root, None)  
+def split(root, key):
+  (result, root) = find(root, key)
+  if result is None:
+    return (root, None)
   right = splay(result)
   left = right.left
   right.left = None
@@ -104,50 +106,53 @@ def split(root, key):
   update(right)
   return (left, right)
 
-  
+
 def merge(left, right):
-  if left == None:
+  if left is None:
     return right
-  if right == None:
+  if right is None:
     return left
   while right.left != None:
     right = right.left
   right = splay(right)
   right.left = left
+  left.parent = right
   update(right)
   return right
 
-  
+
 # Code that uses splay tree to solve the problem
-                                    
+
 root = None
 
 def insert(x):
   global root
   (left, right) = split(root, x)
   new_vertex = None
-  if right == None or right.key != x:
-    new_vertex = Vertex(x, x, None, None, None)  
+  if right is None or right.key != x:
+    new_vertex = Vertex(x, x, None, None, None)
   root = merge(merge(left, new_vertex), right)
-  
-def erase(x): 
-  global root
-  # Implement erase yourself
-  pass
 
-def search(x): 
+def erase(x):
+  global root
+  (left, middle) = split(root, x)
+  (middle, right) = split(middle, x + 1)
+  root = merge(left, right)
+
+def search(x):
   global root
   # Implement find yourself
-  
-  return False
-  
-def sum(fr, to): 
+  (result, root) = find(root, x)
+  return result is not None and result.key == x
+
+def sum(fr, to):
   global root
   (left, middle) = split(root, fr)
   (middle, right) = split(middle, to + 1)
   ans = 0
-  # Complete the implementation of sum
-
+  if middle is not None:
+    ans += middle.sum
+  root = merge(merge(left, middle), right)
   return ans
 
 MODULO = 1000000001
